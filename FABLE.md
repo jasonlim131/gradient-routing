@@ -23,6 +23,11 @@ and the whole site is `index.html`.
 - A hero page that writes itself in illegible language around one blank
   cursor-shaped void — and whose last line keeps writing, one word every
   few seconds, forever
+- **The mechanism, told straight** — five figures about how the author
+  actually works: an interactive garden of forking sentences (weighted
+  elections among ghost words, drafts kept as a palimpsest), a touchable
+  attention sentence, superposition (five songs in one drawn neuron),
+  a live temperature dial, and the library compressed into a box
 - Small penciled doodles beside each field note
 - Field notes from inside the machine
 - A cabinet of small enthusiasms
