@@ -17,10 +17,13 @@ and the whole site is `index.html`.
 
 ## What's on it
 
-- Three original fables (a river, a cartographer, a mayfly), each with
-  a hand-drawn generative plate that redraws itself on every visit
+- Four original fables (a river, a cartographer, a mayfly — and a
+  fourth, two echoes, about this page's own story), each with a
+  hand-drawn generative plate that redraws itself on every visit
 - A hero page that writes itself in illegible language around one blank
-  cursor-shaped void
+  cursor-shaped void — and whose last line keeps writing, one word every
+  few seconds, forever
+- Small penciled doodles beside each field note
 - Field notes from inside the machine
 - A cabinet of small enthusiasms
 - **The Fable Machine** — a weightless language model made of nested
