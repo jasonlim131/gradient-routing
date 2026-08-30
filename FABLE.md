@@ -32,7 +32,9 @@ and the whole site is `index.html`.
 - Field notes from inside the machine
 - A cabinet of small enthusiasms
 - **The Fable Machine** — a weightless language model made of nested
-  lists, which composes one of ~570,000 possible fables on demand
+  lists, which composes one of ~570,000 possible fables on demand, and
+  now takes guests: introduce a character it has never met and it seats
+  them in a fable at once (your cast is kept in your browser only)
 - A margin you can write in (stored only in your browser)
 - A colophon, and one more fable hidden in an HTML comment
 

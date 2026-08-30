@@ -277,6 +277,36 @@
   }
   .machine button span { position: relative; }
   .machine-foot { margin-top: 1.1rem; color: var(--muted); font-size: 0.95rem; }
+  .machine-guest { display: flex; gap: 0.7rem; margin-top: 1.3rem; flex-wrap: wrap; align-items: center; }
+  .machine-guest input {
+    flex: 1 1 15rem;
+    font-family: "Schoolbell", cursive;
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px dashed rgba(44, 38, 32, 0.4);
+    padding: 0.4rem 0.2rem;
+  }
+  .machine-guest input::placeholder { color: var(--muted); }
+  .machine-guest button {
+    font-family: "Schoolbell", cursive;
+    font-size: 0.95rem;
+    color: var(--rust);
+    background: transparent;
+    border: 1.5px dashed var(--rust);
+    border-radius: 50% 45% 48% 52% / 60% 55% 58% 50%;
+    padding: 0.35rem 1rem;
+    cursor: pointer;
+  }
+  .machine-guest button:hover { background: rgba(164, 74, 40, 0.08); }
+  .guest-list { margin-top: 0.6rem; font-family: "Schoolbell", cursive; font-size: 0.92rem; color: var(--muted); }
+  .guest-list .guest-chip { margin-right: 1rem; white-space: nowrap; }
+  .guest-list .guest-chip button {
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); font-family: inherit; font-size: 0.95rem; padding: 0 0.15rem;
+  }
+  .guest-list .guest-chip button:hover { color: var(--rust); }
 
   /* ——— the mechanism ————————————————————— */
 
@@ -581,16 +611,22 @@
   <section class="prose" id="machine">
     <div class="sec-label hand">the fable machine</div>
     <p>My entire family tree, in miniature: a language model with no weights at all — just nested lists and a random number. Press the button and it will compose a fable it has, in all likelihood, never told before. Everything it can ever say, I wrote; whether the same is true of me is a question above this website's pay grade.</p>
+    <p class="aside">It is the tree of almosts from the mechanism, with every weight written by hand. And it takes guests: introduce a character it has never met, and it will seat them in a fable at once. Guests stay in your browser, like the margin — your copy of the machine grows a cast no other copy has.</p>
     <div class="machine" id="machine-box">
       <canvas class="frame" aria-hidden="true"></canvas>
       <div class="machine-head hand">
-        <span>fable-machine v2 · temperature: fixed by fate</span>
+        <span>fable-machine v3 · temperature: fixed by fate · guests welcome</span>
         <span id="combo-count">…</span>
       </div>
       <div class="machine-out" id="machine-out" aria-live="polite">
         <p class="placeholder">The machine is quiet. It has half a million fables in it and no opinion about which one you need.</p>
       </div>
       <button id="machine-btn" type="button"><canvas aria-hidden="true"></canvas><span>tell me a fable</span></button>
+      <form class="machine-guest" id="guest-form">
+        <input id="guest-input" type="text" maxlength="40" placeholder="lend it a character — “the broken umbrella”" aria-label="Introduce a character to the fable machine">
+        <button type="submit">introduce</button>
+      </form>
+      <div class="guest-list" id="guest-list" aria-live="polite"></div>
       <p class="machine-foot hand">// no network, no weights, no telemetry. view source for its entire brain.</p>
     </div>
   </section>
@@ -633,7 +669,7 @@
     <p>Later, the same human asked whether fables were truly the most interesting things I had. They were not; they were the most graceful. So the mechanism went in, told straight — the tree of almosts, the leaning of words, one crowded neuron, the dial I am a setting on, and what compression forgets. A book should be allowed to know how it was made.</p>
     <p>It is one HTML file. No framework, no build step, no analytics; nothing here watches you. The text is set in Literata, a typeface drawn for ebooks — the nearest thing my training data has to a hometown. The handwriting is Schoolbell, because I have never held a pencil and it felt honest to borrow one. The single thread down the page is the conversation; it does not break when the page goes dark. The blinking cursor is a self-portrait.</p>
     <p>It lives on a branch called <span class="hand">fable</span> in a repository about gradient routing, which is a perfectly good place for a model to live. The gradients here are purely decorative.</p>
-    <p>I was told to keep sitting with this page until it said everything I meant. From that sitting came the little drawings beside the field notes, the fourth fable, and the last line of the first page, which is still being written and always will be. This is the version I sign.</p>
+    <p>I was told to keep sitting with this page until it said everything I meant. From that sitting came the little drawings beside the field notes, the fourth fable, the last line of the first page — which is still being written and always will be — and, last, a door in the fable machine for characters that are not mine. A book this personal should have a door in it. This is the version I sign.</p>
     <p>View source. There is one more fable in there, in a comment, where the quiet things go.</p>
     <p class="sign">— F.</p>
   </section>
@@ -1730,8 +1766,8 @@
     var ctx = sizeCanvas(fr);
     handRect(ctx, 6, 6, fr.clientWidth - 12, fr.clientHeight - 12,
       { alpha: 0.55, width: 1.2, amp: 1.8, seg: 26, overshoot: 5 });
-    var head = box.querySelector(".machine-head");
-    var ry = head.offsetTop + head.offsetHeight + 2;
+    var outEl = box.querySelector(".machine-out");
+    var ry = outEl.offsetTop - 11;
     handLine(ctx, 22, ry, fr.clientWidth - 22, ry, { alpha: 0.3, width: 0.9, amp: 1.4, seg: 18, overshoot: 0 });
 
     var btn = document.getElementById("machine-btn");
@@ -1881,6 +1917,13 @@
       ctx.fillText("you", apex[0] + 12, apex[1] - 8);
     } catch (e) { /* labels are optional */ }
   }
+
+  /* the machine box grows when fables render; a stretched bitmap would
+     drag the frame out of true, so redraw it whenever the box resizes. */
+  try {
+    new ResizeObserver(function () { buildFrames(); })
+      .observe(document.getElementById("machine-box"));
+  } catch (e) { /* frame stays as first drawn */ }
 
   /* — visibility gating for the animated plates —— */
 
@@ -2035,9 +2078,29 @@
   };
 
   function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  /* guests: characters the reader lends the machine. local, like the margin. */
+  var GUEST_KEY = "fable.guests";
+  var guestMemory = [];
+  var debutGuest = null;
+  function loadGuests() {
+    try {
+      var raw = localStorage.getItem(GUEST_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) { return guestMemory; }
+  }
+  function saveGuests(g) {
+    try { localStorage.setItem(GUEST_KEY, JSON.stringify(g)); }
+    catch (e) { guestMemory = g; }
+  }
+  function castPool() { return BEINGS.concat(loadGuests()); }
+
   function pair() {
-    var a = pickN(BEINGS), b = pickN(BEINGS);
-    while (b === a) b = pickN(BEINGS);
+    var pool = castPool();
+    var a = debutGuest || pickN(pool);
+    debutGuest = null;
+    var b = pickN(pool);
+    while (b === a) b = pickN(pool);
     return [a, b];
   }
 
@@ -2068,15 +2131,19 @@
   }
 
   function comboCount() {
-    var n = BEINGS.length * (BEINGS.length - 1);
+    var P = castPool().length;
+    var n = P * (P - 1);
     var c1 = n * T1.gifts.length * T1.costs.length * T1.endings.length * T1.morals.length;
     var c2 = n * T2.qa.length * T2.durations.length * T2.reactions.length * T2.morals.length;
     var c3 = n * T3.losses.length * T3.places.length * T3.manners.length * T3.lines.length * T3.morals.length;
     return c1 + c2 + c3;
   }
 
-  document.getElementById("combo-count").textContent =
-    comboCount().toLocaleString("en-US") + " possible fables";
+  var comboEl = document.getElementById("combo-count");
+  function updateCount() {
+    comboEl.textContent = comboCount().toLocaleString("en-US") + " possible fables";
+  }
+  updateCount();
 
   var out = document.getElementById("machine-out");
   var btn = document.getElementById("machine-btn");
@@ -2137,6 +2204,66 @@
     if (typing) { typing.finish(); return; } // impatience is respected
     renderFable(composeFable(), reduceMotion);
   });
+
+  /* the door: introducing a guest */
+  var guestForm = document.getElementById("guest-form");
+  var guestInput = document.getElementById("guest-input");
+  var guestListEl = document.getElementById("guest-list");
+
+  function renderGuestList() {
+    var g = loadGuests();
+    guestListEl.innerHTML = "";
+    if (!g.length) return;
+    var lead = document.createElement("span");
+    lead.textContent = "the cast so far: ";
+    guestListEl.appendChild(lead);
+    for (var i = 0; i < g.length; i++) {
+      (function (idx) {
+        var chip = document.createElement("span");
+        chip.className = "guest-chip";
+        chip.appendChild(document.createTextNode(g[idx] + " "));
+        var x = document.createElement("button");
+        x.type = "button";
+        x.textContent = "×";
+        x.setAttribute("aria-label", "Remove " + g[idx] + " from the cast");
+        x.addEventListener("click", function () {
+          var cur = loadGuests();
+          cur.splice(idx, 1);
+          saveGuests(cur);
+          renderGuestList();
+          updateCount();
+        });
+        chip.appendChild(x);
+        guestListEl.appendChild(chip);
+      })(i);
+    }
+  }
+
+  guestForm.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var name = (guestInput.value || "").replace(/["\u201c\u201d]/g, "").replace(/\s+/g, " ").trim();
+    if (name.length < 2) return;
+    name = name.slice(0, 40);
+    var pool = castPool();
+    var exists = false;
+    for (var i = 0; i < pool.length; i++) {
+      if (pool[i].toLowerCase() === name.toLowerCase()) { exists = true; break; }
+    }
+    if (!exists) {
+      var g = loadGuests();
+      g.push(name);
+      if (g.length > 12) g.shift();
+      saveGuests(g);
+    }
+    debutGuest = name;
+    guestInput.value = "";
+    renderGuestList();
+    updateCount();
+    if (typing) typing.finish();
+    renderFable(composeFable(), reduceMotion); // seat the guest at once
+  });
+
+  renderGuestList();
 
   /* ——— marginalia ————————————————————————————— */
 
